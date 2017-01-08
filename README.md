@@ -2,6 +2,16 @@
 
 A small utility I wrote to help me migrate my Android 2FA accounts DB (from Google Authenticator) to iOS.
 
+**Dependencies**
+
+1. ```pull``` command requires a **rooted** Android device
+2. ```pip install -r requirements.txt``` in your virtualenv before running
+3. Currently supported database formats: Singular Authenticator, Google Authenticator 
+
+----------
+
+
+    
 ## Usage
 
 
