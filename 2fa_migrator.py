@@ -13,6 +13,7 @@ def cli():
     pass
 
 DB_TYPE_GOOGLE_AUTHENTICATOR = "GA"
+DB_TYPE_SINGULAR_AUTHENTICATOR = "SA"
 
 # utils
 # NOTE: this is just a heuristic that worked well for me (for nice labelling)
@@ -25,6 +26,7 @@ def extract_issuer_from_email(email):
 
     if ":" in email:
         return email.split(":")[0]
+
 
 # db parsing handlers
 def parse_google_authenticator_db(db_path):
@@ -46,6 +48,16 @@ def parse_google_authenticator_db(db_path):
 
 # db pulling handlers
 def pull_google_authenticator_db(dest):
+    cmdline = "adb pull /data/data/com.google.android.apps.authenticator2/databases/databases %s" % dest
+
+    print "executing '%s', output:" % cmdline
+    pipe = subprocess.Popen(cmdline.split(), stdout=subprocess.PIPE)
+    print pipe.stdout.read()
+    print
+    print "done."
+
+
+def pull_singular_authenticator_db(dest):
     cmdline = "adb pull /data/data/net.singular.authenticator/databases/databases %s" % dest
 
     print "executing '%s', output:" % cmdline
@@ -61,7 +73,8 @@ def pull_google_authenticator_db(dest):
               default=DB_TYPE_GOOGLE_AUTHENTICATOR)
 def generate(db, type):
     DB_TYPE_HANDLERS = {
-        DB_TYPE_GOOGLE_AUTHENTICATOR: parse_google_authenticator_db
+        DB_TYPE_GOOGLE_AUTHENTICATOR: parse_google_authenticator_db,
+        DB_TYPE_SINGULAR_AUTHENTICATOR: parse_google_authenticator_db # identical, it's a fork :)
     }
 
     if type not in DB_TYPE_HANDLERS:
@@ -77,13 +90,15 @@ def generate(db, type):
 
         qrcode.make(line).save(file(filename, "wb"), "png")
 
+
 @cli.command(name="pull", help="Pull 2FA database file from your device")
 @click.option("--type", help="database type (default: %s)" % DB_TYPE_GOOGLE_AUTHENTICATOR,
               default=DB_TYPE_GOOGLE_AUTHENTICATOR)
 @click.option("--dest", help="destination filename (default=db.bin)", default="db.bin")
 def pull(type, dest):
     DB_TYPE_HANDLERS = {
-        DB_TYPE_GOOGLE_AUTHENTICATOR: pull_google_authenticator_db
+        DB_TYPE_GOOGLE_AUTHENTICATOR: pull_google_authenticator_db,
+        DB_TYPE_SINGULAR_AUTHENTICATOR: pull_singular_authenticator_db
     }
 
     if type not in DB_TYPE_HANDLERS:
