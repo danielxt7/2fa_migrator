@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 import subprocess
 
 import qrcode
@@ -63,6 +64,10 @@ def generate(db, type):
         DB_TYPE_GOOGLE_AUTHENTICATOR: parse_google_authenticator_db
     }
 
+    if type not in DB_TYPE_HANDLERS:
+        sys.stderr.write("No handler for db type '%s' for generate! implement it! :)\n" % type)
+        sys.exit(1)
+
     db_type_handler = DB_TYPE_HANDLERS[type]
 
     for id, label, issuer, email, secret, line in db_type_handler(db):
@@ -80,6 +85,10 @@ def pull(type, dest):
     DB_TYPE_HANDLERS = {
         DB_TYPE_GOOGLE_AUTHENTICATOR: pull_google_authenticator_db
     }
+
+    if type not in DB_TYPE_HANDLERS:
+        sys.stderr.write("No handler for db type '%s' for pull! implement it! :)\n" % type)
+        sys.exit(1)
 
     db_type_handler = DB_TYPE_HANDLERS[type]
 
