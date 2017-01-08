@@ -42,7 +42,7 @@ def parse_google_authenticator_db(db_path):
         yield (id, label, issuer, email, secret, line)
 
 
-@cli.command(name="generate", help="Generate QR Codes for 2FA database entires")
+@cli.command(name="generate", help="Generate QR Codes for 2FA database entries")
 @click.option("--db", help="Path to database file", required=True)
 @click.option("--type", help="database type (default: %s)" % DB_TYPE_GOOGLE_AUTHENTICATOR,
               default=DB_TYPE_GOOGLE_AUTHENTICATOR)
