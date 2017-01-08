@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import subprocess
 
 import qrcode
 import sqlite3
@@ -42,6 +43,17 @@ def parse_google_authenticator_db(db_path):
         yield (id, label, issuer, email, secret, line)
 
 
+# db pulling handlers
+def pull_google_authenticator_db(dest):
+    cmdline = "adb pull /data/data/net.singular.authenticator/databases/databases %s" % dest
+
+    print "executing '%s', output:" % cmdline
+    pipe = subprocess.Popen(cmdline.split(), stdout=subprocess.PIPE)
+    print pipe.stdout.read()
+    print
+    print "done."
+
+
 @cli.command(name="generate", help="Generate QR Codes for 2FA database entries")
 @click.option("--db", help="Path to database file", required=True)
 @click.option("--type", help="database type (default: %s)" % DB_TYPE_GOOGLE_AUTHENTICATOR,
@@ -59,6 +71,20 @@ def generate(db, type):
         print "writing QR Code for '%s' => %s" % (label, filename)
 
         qrcode.make(line).save(file(filename, "wb"), "png")
+
+@cli.command(name="pull", help="Pull 2FA database file from your device")
+@click.option("--type", help="database type (default: %s)" % DB_TYPE_GOOGLE_AUTHENTICATOR,
+              default=DB_TYPE_GOOGLE_AUTHENTICATOR)
+@click.option("--dest", help="destination filename (default=db.bin)", default="db.bin")
+def pull(type, dest):
+    DB_TYPE_HANDLERS = {
+        DB_TYPE_GOOGLE_AUTHENTICATOR: pull_google_authenticator_db
+    }
+
+    db_type_handler = DB_TYPE_HANDLERS[type]
+
+    print "pulling db of type '%s' => %s" % (type, dest)
+    db_type_handler(dest)
 
 
 if __name__ == '__main__':
